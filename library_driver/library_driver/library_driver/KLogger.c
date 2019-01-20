@@ -205,11 +205,15 @@ KLoggerInit(
 ) {
 	int Err = ERROR_SUCCESS;
 
+    DbgPrint(__FUNCTION__"\n");
+
 	gKLogger = (PKLOGGER)ExAllocatePool(NonPagedPool, sizeof(KLOGGER));
 	if (gKLogger == NULL) {
 		Err = ERROR_NOT_ENOUGH_MEMORY;
 		goto err_klogger_mem;
 	}
+
+    DbgPrint(__FUNCTION__"gKllogger= %p\n", gKLogger);
 
 	SIZE_T RingBufSize = GetRingBufSize(RegistryPath);
 	Err = RBInit(&(gKLogger->pRingBuf), RingBufSize);
@@ -384,6 +388,7 @@ INT
 KLoggerLog(
 	PCSTR LogMsg
 ) {
+//    DbgPrint("%s gKLogger = %p\n", __FUNCTION__, gKLogger);
 	int Err = RBWrite(gKLogger->pRingBuf, LogMsg, StrLen(LogMsg));
 	int LoadFactor = RBLoadFactor(gKLogger->pRingBuf);
 	DbgPrint("Load factor: %d\n", LoadFactor);
@@ -398,5 +403,6 @@ KLoggerLog(
 			KeInsertQueueDpc(gKLogger->pFlushDpc, NULL, NULL);
 		}
 	}
+
 	return Err;
 }

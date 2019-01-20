@@ -2,29 +2,6 @@
 #include <winerror.h>
 #include "KLogger.h"
 
-
-VOID DriverUnload(
-	_In_ struct _DRIVER_OBJECT *DriverObject
-)
-{
-	UNREFERENCED_PARAMETER(DriverObject);
-	// __debugbreak();
-	DbgPrint("[library_driver]: 'DriverUnload()' is executed");
-	return;
-}
-
-NTSTATUS DriverEntry(
-	_In_ struct _DRIVER_OBJECT *DriverObject,
-	_In_ PUNICODE_STRING       RegistryPath
-)
-{
-	// __debugbreak();
-	DbgPrint("[library_driver]: 'DriverEntry()' is executed");
-	UNREFERENCED_PARAMETER(RegistryPath);
-	DriverObject->DriverUnload = DriverUnload;
-	return STATUS_SUCCESS;
-}
-
 NTSTATUS DllInitialize(
 	_In_ PUNICODE_STRING RegistryPath
 )
@@ -51,4 +28,28 @@ NTSTATUS DllUnload(void)
 
 	DbgPrint("[library_driver]: 'DllUnload()' is finished");
 	return STATUS_SUCCESS;
+}
+
+VOID DriverUnload(
+	_In_ struct _DRIVER_OBJECT *DriverObject
+)
+{
+	UNREFERENCED_PARAMETER(DriverObject);
+	// __debugbreak();
+    DllUnload();
+	DbgPrint("[library_driver]: 'DriverUnload()' is executed");
+	return;
+}
+
+NTSTATUS DriverEntry(
+	_In_ struct _DRIVER_OBJECT *DriverObject,
+	_In_ PUNICODE_STRING       RegistryPath
+)
+{
+	// __debugbreak();
+	DbgPrint("[library_driver]: 'DriverEntry()' is executed");
+	//UNREFERENCED_PARAMETER(RegistryPath);
+	DriverObject->DriverUnload = DriverUnload;
+    return DllInitialize(RegistryPath);
+	//return STATUS_SUCCESS;
 }
